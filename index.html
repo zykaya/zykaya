@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İş Makinaları Yedek Parça Envanter Sistemi</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #2c3e50, #4a6491);
+            color: white;
+            padding: 20px 0;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+        
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .buttons-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .search-container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .search-box {
+            display: flex;
+            gap: 10px;
+        }
+        
+        input[type="text"], input[type="number"], select {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus, input[type="number"]:focus, select:focus {
+            border-color: #4a6491;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(74, 100, 145, 0.2);
+        }
+        
+        button {
+            background-color: #4a6491;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        button:hover {
+            background-color: #2c3e50;
+        }
+        
+        .btn-success {
+            background-color: #28a745;
+        }
+        
+        .btn-success:hover {
+            background-color: #218838;
+        }
+        
+        .btn-danger {
+            background-color: #dc3545;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        
+        .btn-warning {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        
+        .btn-warning:hover {
+            background-color: #e0a800;
+        }
+        
+        .btn-info {
+            background-color: #17a2b8;
+        }
+        
+        .btn-info:hover {
+            background-color: #138496;
+        }
+        
+        .results-container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .results-container.active {
+            display: block;
+        }
+        
+        .takim-card {
+            border: 1px solid #e1e5eb;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #f9fafc;
+            transition: transform 0.2s;
+            position: relative;
+        }
+        
+        .takim-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .takim-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e1e5eb;
+        }
+        
+        .takim-adi {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .takim-kategori {
+            background-color: #6c757d;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        
+        .takim-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .parca-listesi {
+            list-style-type: none;
+        }
+        
+        .parca-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 5px;
+            border-bottom: 1px dashed #e1e5eb;
+        }
+        
+        .parca-item:last-child {
+            border-bottom: none;
+        }
+        
+        .parca-adi {
+            flex: 1;
+        }
+        
+        .parca-miktar {
+            background-color: #4a6491;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+        
+        .parca-miktar.low-stock {
+            background-color: #dc3545;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 20px;
+            color: #777;
+            font-style: italic;
+        }
+        
+        .instructions {
+            background-color: #e8f4fd;
+            border-left: 4px solid #4a6491;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4a6491;
+            margin: 10px 0;
+        }
+        
+        .stat-label {
+            color: #6c757d;
+            font-size: 14px;
+        }
+        
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 5px;
+            color: white;
+            z-index: 10000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            max-width: 350px;
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+        }
+        
+        .toast-success { background-color: #28a745; }
+        .toast-error { background-color: #dc3545; }
+        .toast-warning { background-color: #ffc107; color: #212529; }
+        .toast-info { background-color: #17a2b8; }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            color: #777;
+            font-size: 14px;
+        }
+        
+        /* Modal Stilleri */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 700px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e1e5eb;
+        }
+        
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: #000;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        .parca-ekle-container {
+            margin-top: 20px;
+            border-top: 1px solid #e1e5eb;
+            padding-top: 15px;
+        }
+        
+        .parca-item-ekle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        
+        .parca-item-ekle input {
+            flex: 1;
+        }
+        
+        .remove-parca {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+        
+        .backup-container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .backup-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .search-box {
+                flex-direction: column;
+            }
+            
+            .buttons-container {
+                flex-direction: column;
+            }
+            
+            .takim-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .takim-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+            
+            .parca-item-ekle {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .backup-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div>
+                    <h1><i class="fas fa-tools"></i> İş Makinaları Yedek Parça Envanter Sistemi</h1>
+                    <p>Tamir takımları ve conta envanterinizi kolayca yönetin</p>
+                </div>
+            </div>
+        </header>
+        
+        <div class="instructions">
+            <h3><i class="fas fa-info-circle"></i> Nasıl Kullanılır?</h3>
+            <p>Arama kutusuna parça adı, takım adı veya herhangi bir anahtar kelime yazarak arama yapabilirsiniz. "Yeni Takım Ekle" butonu ile yeni takım ekleyebilir, "Tüm Takımları Göster" butonu ile tüm takımları listeleyebilirsiniz.</p>
+        </div>
+        
+        <div class="stats-container" id="statsContainer">
+            <!-- İstatistikler burada görünecek -->
+        </div>
+        
+        <div class="buttons-container">
+            <button id="addTakimBtn" class="btn-success"><i class="fas fa-plus"></i> Yeni Takım Ekle</button>
+            <button id="showAllBtn"><i class="fas fa-list"></i> Tüm Takımları Göster</button>
+            <button id="showLowStockBtn" class="btn-warning"><i class="fas fa-exclamation-triangle"></i> Düşük Stok</button>
+            <button id="exportBtn" class="btn-info"><i class="fas fa-download"></i> Veri Yedekle</button>
+        </div>
+        
+        <div class="backup-container">
+            <h3><i class="fas fa-database"></i> Veri Yönetimi</h3>
+            <div class="backup-buttons">
+                <button id="importBtn" class="btn-info"><i class="fas fa-upload"></i> Veri Geri Yükle</button>
+                <button id="resetDataBtn" class="btn-danger"><i class="fas fa-trash"></i> Örnek Verilere Dön</button>
+            </div>
+            <input type="file" id="importFile" accept=".json" style="display: none;">
+        </div>
+        
+        <div class="search-container">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Parça veya takım adı girin...">
+                <select id="categoryFilter">
+                    <option value="">Tüm Kategoriler</option>
+                    <!-- Kategoriler dinamik olarak eklenecek -->
+                </select>
+                <button id="searchButton"><i class="fas fa-search"></i> Ara</button>
+            </div>
+        </div>
+        
+        <div class="results-container" id="resultsContainer">
+            <!-- Arama sonuçları burada görünecek -->
+        </div>
+    </div>
+    
+    <!-- Yeni Takım Ekleme Modalı -->
+    <div id="addTakimModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Yeni Takım Ekle</h2>
+                <span class="close">&times;</span>
+            </div>
+            <form id="takimForm">
+                <div class="form-group">
+                    <label for="takimAdi">Takım Adı:</label>
+                    <input type="text" id="takimAdi" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="takimKategori">Kategori:</label>
+                    <select id="takimKategori" required>
+                        <!-- Kategoriler dinamik olarak eklenecek -->
+                    </select>
+                </div>
+                
+                <div class="parca-ekle-container">
+                    <h3>Parçalar</h3>
+                    <div id="parcalarContainer">
+                        <div class="parca-item-ekle">
+                            <input type="text" class="parcaAdi" placeholder="Parça adı" required>
+                            <input type="number" class="parcaMiktar" placeholder="Miktar" min="1" value="1" required>
+                            <button type="button" class="remove-parca"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                    <button type="button" id="addParcaBtn" class="btn-warning"><i class="fas fa-plus"></i> Yeni Parça Ekle</button>
+                </div>
+                
+                <div style="margin-top: 20px; display: flex; gap: 10px;">
+                    <button type="submit" class="btn-success"><i class="fas fa-save"></i> Kaydet</button>
+                    <button type="button" id="cancelBtn"><i class="fas fa-times"></i> İptal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Takım Düzenleme Modalı -->
+    <div id="editTakimModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Takımı Düzenle</h2>
+                <span class="close">&times;</span>
+            </div>
+            <form id="editTakimForm">
+                <input type="hidden" id="editTakimId">
+                <div class="form-group">
+                    <label for="editTakimAdi">Takım Adı:</label>
+                    <input type="text" id="editTakimAdi" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editTakimKategori">Kategori:</label>
+                    <select id="editTakimKategori" required>
+                        <!-- Kategoriler dinamik olarak eklenecek -->
+                    </select>
+                </div>
+                
+                <div class="parca-ekle-container">
+                    <h3>Parçalar</h3>
+                    <div id="editParcalarContainer">
+                        <!-- Parçalar buraya dinamik olarak eklenecek -->
+                    </div>
+                    <button type="button" id="editAddParcaBtn" class="btn-warning"><i class="fas fa-plus"></i> Yeni Parça Ekle</button>
+                </div>
+                
+                <div style="margin-top: 20px; display: flex; gap: 10px;">
+                    <button type="submit" class="btn-success"><i class="fas fa-save"></i> Güncelle</button>
+                    <button type="button" id="editCancelBtn"><i class="fas fa-times"></i> İptal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <footer>
+        <p>© 2023 İş Makinaları Yedek Parça Envanter Sistemi</p>
+    </footer>
+
+    <script>
+        // Constants
+        const STORAGE_KEYS = {
+            TAKIMLAR: 'takimlar',
+            KATEGORILER: 'kategoriler'
+        };
+
+        const CRITICAL_STOCK_LEVEL = 5;
+
+        // Utility functions
+        const utils = {
+            generateId: () => Date.now() + Math.floor(Math.random() * 1000),
+            formatNumber: (num) => num.toLocaleString('tr-TR'),
+            deepClone: (obj) => JSON.parse(JSON.stringify(obj)),
+            escapeHtml: (unsafe) => {
+                return unsafe
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            }
+        };
+
+        // Örnek veri
+        let takimlar = [
+            {
+                id: 1,
+                adi: "Küçük Tamir Takımı",
+                kategori: "Hidrolik",
+                parcalar: [
+                    { adi: "Silindir Contası", miktar: 1 },
+                    { adi: "Piston Contası", miktar: 2 },
+                    { adi: "Yağ Keçesi", miktar: 1 },
+                    { adi: "Vana Contası", miktar: 1 },
+                    { adi: "Yakıt Pompası Contası", miktar: 1 },
+                    { adi: "Hidrolik Hortum Contası", miktar: 2 },
+                    { adi: "Egzoz Manifoldu Contası", miktar: 1 },
+                    { adi: "Emme Manifoldu Contası", miktar: 1 },
+                    { adi: "Su Pompası Contası", miktar: 1 },
+                    { adi: "Radyatör Contası", miktar: 1 },
+                    { adi: "Transmisyon Contası", miktar: 1 },
+                    { adi: "Diferansiyel Contası", miktar: 1 }
+                ]
+            },
+            {
+                id: 2,
+                adi: "Büyük Tamir Takımı",
+                kategori: "Motor",
+                parcalar: [
+                    { adi: "Silindir Contası", miktar: 2 },
+                    { adi: "Piston Contası", miktar: 4 },
+                    { adi: "Yağ Keçesi", miktar: 2 },
+                    { adi: "Vana Contası", miktar: 2 },
+                    { adi: "Yakıt Pompası Contası", miktar: 2 },
+                    { adi: "Hidrolik Hortum Contası", miktar: 4 },
+                    { adi: "Egzoz Manifoldu Contası", miktar: 2 },
+                    { adi: "Emme Manifoldu Contası", miktar: 2 },
+                    { adi: "Su Pompası Contası", miktar: 2 },
+                    { adi: "Radyatör Contası", miktar: 2 },
+                    { adi: "Transmisyon Contası", miktar: 2 },
+                    { adi: "Diferansiyel Contası", miktar: 2 }
+                ]
+            }
+        ];
+
+        let kategoriler = ["Hidrolik", "Motor", "Elektrik", "Şase", "Diğer"];
+
+        // DOM elementleri
+        const searchInput = document.getElementById('searchInput');
+        const searchButton = document.getElementById('searchButton');
+        const categoryFilter = document.getElementById('categoryFilter');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const statsContainer = document.getElementById('statsContainer');
+        const addTakimBtn = document.getElementById('addTakimBtn');
+        const showAllBtn = document.getElementById('showAllBtn');
+        const showLowStockBtn = document.getElementById('showLowStockBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        const importBtn = document.getElementById('importBtn');
+        const importFile = document.getElementById('importFile');
+        const resetDataBtn = document.getElementById('resetDataBtn');
+        const addTakimModal = document.getElementById('addTakimModal');
+        const editTakimModal = document.getElementById('editTakimModal');
+        const closeButtons = document.querySelectorAll('.close');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const editCancelBtn = document.getElementById('editCancelBtn');
+        const takimForm = document.getElementById('takimForm');
+        const editTakimForm = document.getElementById('editTakimForm');
+        const parcalarContainer = document.getElementById('parcalarContainer');
+        const addParcaBtn = document.getElementById('addParcaBtn');
+        const editParcalarContainer = document.getElementById('editParcalarContainer');
+        const editAddParcaBtn = document.getElementById('editAddParcaBtn');
+        const takimKategori = document.getElementById('takimKategori');
+        const editTakimKategori = document.getElementById('editTakimKategori');
+
+        // Toast mesaj sistemi
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation-triangle' : type === 'warning' ? 'exclamation' : 'info'}"></i>
+                ${message}
+            `;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 100);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Hata yönetimi
+        function handleError(error, userMessage = 'Bir hata oluştu') {
+            console.error(error);
+            showToast(userMessage, 'error');
+        }
+
+        // Veri doğrulama
+        function validateTakim(takimAdi, parcalar) {
+            const errors = [];
+            
+            if (!takimAdi || takimAdi.trim().length < 2) {
+                errors.push("Takım adı en az 2 karakter olmalıdır");
+            }
+            
+            if (parcalar.length === 0) {
+                errors.push("En az bir parça eklemelisiniz");
+            }
+            
+            parcalar.forEach((parca, index) => {
+                if (!parca.adi || parca.adi.trim().length === 0) {
+                    errors.push(`${index + 1}. parça adı boş olamaz`);
+                }
+                if (!parca.miktar || parca.miktar < 1) {
+                    errors.push(`${index + 1}. parça miktarı 1'den küçük olamaz`);
+                }
+            });
+            
+            return errors;
+        }
+
+        // Sayfa yüklendiğinde localStorage'dan verileri al
+        window.addEventListener('load', function() {
+            const storedTakimlar = localStorage.getItem(STORAGE_KEYS.TAKIMLAR);
+            const storedKategoriler = localStorage.getItem(STORAGE_KEYS.KATEGORILER);
+            
+            if (storedTakimlar) {
+                takimlar = JSON.parse(storedTakimlar);
+            }
+            
+            if (storedKategoriler) {
+                kategoriler = JSON.parse(storedKategoriler);
+            }
+            
+            // Kategori dropdown'larını doldur
+            populateCategoryDropdowns();
+            
+            // İstatistikleri göster
+            updateStats();
+            
+            // Örnek arama yap
+            searchInput.value = 'conta';
+            performSearch();
+        });
+
+        // Kategori dropdown'larını doldur
+        function populateCategoryDropdowns() {
+            // Ana kategori filtre dropdown'ını doldur
+            categoryFilter.innerHTML = '<option value="">Tüm Kategoriler</option>';
+            kategoriler.forEach(kategori => {
+                categoryFilter.innerHTML += `<option value="${kategori}">${kategori}</option>`;
+            });
+            
+            // Modal kategori dropdown'larını doldur
+            takimKategori.innerHTML = '';
+            editTakimKategori.innerHTML = '';
+            kategoriler.forEach(kategori => {
+                takimKategori.innerHTML += `<option value="${kategori}">${kategori}</option>`;
+                editTakimKategori.innerHTML += `<option value="${kategori}">${kategori}</option>`;
+            });
+        }
+
+        // İstatistikleri güncelle
+        function updateStats() {
+            const totalTakimlar = takimlar.length;
+            const totalParcalar = takimlar.reduce((sum, takim) => sum + takim.parcalar.length, 0);
+            const totalStok = takimlar.reduce((sum, takim) => 
+                sum + takim.parcalar.reduce((parcaSum, parca) => parcaSum + parca.miktar, 0), 0);
+            
+            const lowStockItems = checkLowStock();
+            
+            statsContainer.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-label">Toplam Takım</div>
+                    <div class="stat-value">${utils.formatNumber(totalTakimlar)}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Toplam Parça Çeşidi</div>
+                    <div class="stat-value">${utils.formatNumber(totalParcalar)}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Toplam Stok</div>
+                    <div class="stat-value">${utils.formatNumber(totalStok)}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Düşük Stok</div>
+                    <div class="stat-value ${lowStockItems.length > 0 ? 'toast-warning' : ''}">${utils.formatNumber(lowStockItems.length)}</div>
+                </div>
+            `;
+        }
+
+        // Düşük stok kontrolü
+        function checkLowStock() {
+            const lowStockItems = [];
+            
+            takimlar.forEach(takim => {
+                takim.parcalar.forEach(parca => {
+                    if (parca.miktar < CRITICAL_STOCK_LEVEL) {
+                        lowStockItems.push({
+                            takim: takim.adi,
+                            parca: parca.adi,
+                            miktar: parca.miktar
+                        });
+                    }
+                });
+            });
+            
+            return lowStockItems;
+        }
+
+        // Arama fonksiyonu
+        function performSearch() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            const selectedCategory = categoryFilter.value;
+            
+            if (searchTerm === '' && selectedCategory === '') {
+                resultsContainer.classList.remove('active');
+                return;
+            }
+            
+            // Arama sonuçlarını filtrele
+            const filteredTakimlar = takimlar.filter(takim => {
+                // Kategori filtreleme
+                if (selectedCategory !== '' && takim.kategori !== selectedCategory) {
+                    return false;
+                }
+                
+                // Takım adında arama
+                if (searchTerm !== '' && takim.adi.toLowerCase().includes(searchTerm)) {
+                    return true;
+                }
+                
+                // Parça adlarında arama
+                if (searchTerm !== '') {
+                    const matchingParcalar = takim.parcalar.filter(parca => 
+                        parca.adi.toLowerCase().includes(searchTerm)
+                    );
+                    return matchingParcalar.length > 0;
+                }
+                
+                return true;
+            });
+            
+            // Sonuçları göster
+            displayResults(filteredTakimlar, searchTerm);
+        }
+
+        // Sonuçları ekranda göster
+        function displayResults(takimlar, searchTerm) {
+            resultsContainer.innerHTML = '';
+            
+            if (takimlar.length === 0) {
+                resultsContainer.innerHTML = '<div class="no-results">Arama kriterlerinize uygun sonuç bulunamadı.</div>';
+            } else {
+                takimlar.forEach(takim => {
+                    const takimCard = document.createElement('div');
+                    takimCard.className = 'takim-card';
+                    
+                    let parcalarHTML = '';
+                    takim.parcalar.forEach(parca => {
+                        // XSS koruması için escapeHtml kullan
+                        const safeAdi = utils.escapeHtml(parca.adi);
+                        
+                        // Parça adında arama terimi varsa vurgula
+                        const highlightedAd = searchTerm !== '' && parca.adi.toLowerCase().includes(searchTerm) 
+                            ? safeAdi.replace(new RegExp(utils.escapeHtml(searchTerm), 'gi'), match => `<span style="background-color: #ffeb3b;">${match}</span>`)
+                            : safeAdi;
+                        
+                        const stockClass = parca.miktar < CRITICAL_STOCK_LEVEL ? 'low-stock' : '';
+                        
+                        parcalarHTML += `
+                            <li class="parca-item">
+                                <span class="parca-adi">${highlightedAd}</span>
+                                <span class="parca-miktar ${stockClass}">${parca.miktar} adet</span>
+                            </li>
+                        `;
+                    });
+                    
+                    // XSS koruması için escapeHtml kullan
+                    const safeTakimAdi = utils.escapeHtml(takim.adi);
+                    
+                    // Takım adında arama terimi varsa vurgula
+                    const highlightedTakimAdi = searchTerm !== '' && takim.adi.toLowerCase().includes(searchTerm)
+                        ? safeTakimAdi.replace(new RegExp(utils.escapeHtml(searchTerm), 'gi'), match => `<span style="background-color: #ffeb3b;">${match}</span>`)
+                        : safeTakimAdi;
+                    
+                    takimCard.innerHTML = `
+                        <div class="takim-header">
+                            <div>
+                                <span class="takim-adi">${highlightedTakimAdi}</span>
+                                <span class="takim-kategori">${takim.kategori}</span>
+                            </div>
+                            <div class="takim-actions">
+                                <button class="btn-warning edit-takim" data-id="${takim.id}"><i class="fas fa-edit"></i> Düzenle</button>
+                                <button class="btn-danger delete-takim" data-id="${takim.id}"><i class="fas fa-trash"></i> Sil</button>
+                            </div>
+                        </div>
+                        <ul class="parca-listesi">
+                            ${parcalarHTML}
+                        </ul>
+                    `;
+                    
+                    resultsContainer.appendChild(takimCard);
+                });
+                
+                // Düzenle ve sil butonlarına event listener ekle
+                document.querySelectorAll('.edit-takim').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const takimId = parseInt(this.getAttribute('data-id'));
+                        openEditModal(takimId);
+                    });
+                });
+                
+                document.querySelectorAll('.delete-takim').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const takimId = parseInt(this.getAttribute('data-id'));
+                        deleteTakim(takimId);
+                    });
+                });
+            }
+            
+            resultsContainer.classList.add('active');
+        }
+
+        // Tüm takımları göster
+        function showAllTakimlar() {
+            searchInput.value = '';
+            categoryFilter.value = '';
+            displayResults(takimlar, '');
+        }
+
+        // Düşük stoktakileri göster
+        function showLowStock() {
+            const lowStockTakimlar = takimlar.filter(takim => {
+                return takim.parcalar.some(parca => parca.miktar < CRITICAL_STOCK_LEVEL);
+            });
+            
+            searchInput.value = '';
+            categoryFilter.value = '';
+            displayResults(lowStockTakimlar, '');
+            showToast(`${lowStockTakimlar.length} takımda düşük stok bulundu`, 'warning');
+        }
+
+        // Yeni parça ekleme alanı oluştur
+        function addParcaField(container) {
+            const parcaDiv = document.createElement('div');
+            parcaDiv.className = 'parca-item-ekle';
+            parcaDiv.innerHTML = `
+                <input type="text" class="parcaAdi" placeholder="Parça adı" required>
+                <input type="number" class="parcaMiktar" placeholder="Miktar" min="1" value="1" required>
+                <button type="button" class="remove-parca"><i class="fas fa-trash"></i></button>
+            `;
+            container.appendChild(parcaDiv);
+            
+            // Silme butonuna event listener ekle
+            parcaDiv.querySelector('.remove-parca').addEventListener('click', function() {
+                // En az bir parça alanı kalmalı
+                if (container.children.length > 1) {
+                    parcaDiv.remove();
+                }
+            });
+        }
+
+        // Modal açma/kapama fonksiyonları
+        function openAddModal() {
+            // Formu temizle
+            takimForm.reset();
+            parcalarContainer.innerHTML = '';
+            
+            // En az bir parça alanı ekle
+            addParcaField(parcalarContainer);
+            
+            addTakimModal.style.display = 'block';
+        }
+
+        function openEditModal(takimId) {
+            const takim = takimlar.find(t => t.id === takimId);
+            if (!takim) return;
+            
+            // Formu doldur
+            document.getElementById('editTakimId').value = takim.id;
+            document.getElementById('editTakimAdi').value = takim.adi;
+            document.getElementById('editTakimKategori').value = takim.kategori;
+            
+            // Parçaları ekle
+            editParcalarContainer.innerHTML = '';
+            takim.parcalar.forEach(parca => {
+                const parcaDiv = document.createElement('div');
+                parcaDiv.className = 'parca-item-ekle';
+                parcaDiv.innerHTML = `
+                    <input type="text" class="parcaAdi" value="${utils.escapeHtml(parca.adi)}" required>
+                    <input type="number" class="parcaMiktar" value="${parca.miktar}" min="1" required>
+                    <button type="button" class="remove-parca"><i class="fas fa-trash"></i></button>
+                `;
+                editParcalarContainer.appendChild(parcaDiv);
+                
+                // Silme butonuna event listener ekle
+                parcaDiv.querySelector('.remove-parca').addEventListener('click', function() {
+                    // En az bir parça alanı kalmalı
+                    if (editParcalarContainer.children.length > 1) {
+                        parcaDiv.remove();
+                    }
+                });
+            });
+            
+            editTakimModal.style.display = 'block';
+        }
+
+        function closeModals() {
+            addTakimModal.style.display = 'none';
+            editTakimModal.style.display = 'none';
+        }
+
+        // Yeni takım ekle
+        function addTakim(takimAdi, kategori, parcalar) {
+            const validationErrors = validateTakim(takimAdi, parcalar);
+            if (validationErrors.length > 0) {
+                showToast(validationErrors.join(', '), 'error');
+                return;
+            }
+            
+            const newId = takimlar.length > 0 ? Math.max(...takimlar.map(t => t.id)) + 1 : 1;
+            
+            const newTakim = {
+                id: newId,
+                adi: takimAdi,
+                kategori: kategori,
+                parcalar: parcalar
+            };
+            
+            takimlar.push(newTakim);
+            localStorage.setItem(STORAGE_KEYS.TAKIMLAR, JSON.stringify(takimlar));
+            
+            // Sonuçları güncelle
+            performSearch();
+            updateStats();
+            closeModals();
+            
+            showToast('Takım başarıyla eklendi!', 'success');
+        }
+
+        // Takım güncelle
+        function updateTakim(takimId, takimAdi, kategori, parcalar) {
+            const validationErrors = validateTakim(takimAdi, parcalar);
+            if (validationErrors.length > 0) {
+                showToast(validationErrors.join(', '), 'error');
+                return;
+            }
+            
+            const takimIndex = takimlar.findIndex(t => t.id === takimId);
+            
+            if (takimIndex !== -1) {
+                takimlar[takimIndex].adi = takimAdi;
+                takimlar[takimIndex].kategori = kategori;
+                takimlar[takimIndex].parcalar = parcalar;
+                
+                localStorage.setItem(STORAGE_KEYS.TAKIMLAR, JSON.stringify(takimlar));
+                
+                // Sonuçları güncelle
+                performSearch();
+                updateStats();
+                closeModals();
+                
+                showToast('Takım başarıyla güncellendi!', 'success');
+            }
+        }
+
+        // Takım sil
+        function deleteTakim(takimId) {
+            if (confirm('Bu takımı silmek istediğinizden emin misiniz?')) {
+                takimlar = takimlar.filter(t => t.id !== takimId);
+                localStorage.setItem(STORAGE_KEYS.TAKIMLAR, JSON.stringify(takimlar));
+                
+                // Sonuçları güncelle
+                performSearch();
+                updateStats();
+                
+                showToast('Takım başarıyla silindi!', 'success');
+            }
+        }
+
+        // Veri yedekleme (export)
+        function exportData() {
+            const data = {
+                takimlar: takimlar,
+                kategoriler: kategoriler,
+                exportDate: new Date().toISOString(),
+                version: '1.0'
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `envanter-backup-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            
+            showToast('Veriler başarıyla yedeklendi!', 'success');
+        }
+
+        // Veri geri yükleme (import)
+        function importData(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (!data.takimlar || !Array.isArray(data.takimlar)) {
+                        throw new Error('Geçersiz veri formatı');
+                    }
+                    
+                    if (confirm('Mevcut veriler silinecek. Emin misiniz?')) {
+                        takimlar = data.takimlar;
+                        if (data.kategoriler && Array.isArray(data.kategoriler)) {
+                            kategoriler = data.kategoriler;
+                        }
+                        
+                        localStorage.setItem(STORAGE_KEYS.TAKIMLAR, JSON.stringify(takimlar));
+                        localStorage.setItem(STORAGE_KEYS.KATEGORILER, JSON.stringify(kategoriler));
+                        
+                        populateCategoryDropdowns();
+                        showAllTakimlar();
+                        updateStats();
+                        
+                        showToast('Veriler başarıyla geri yüklendi!', 'success');
+                    }
+                } catch (error) {
+                    handleError(error, 'Geçersiz dosya formatı');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Örnek verilere dön
+        function resetToSampleData() {
+            if (confirm('Tüm veriler silinip örnek veriler yüklenecek. Emin misiniz?')) {
+                // Örnek verileri yükle
+                takimlar = [
+                    {
+                        id: 1,
+                        adi: "Küçük Tamir Takımı",
+                        kategori: "Hidrolik",
+                        parcalar: [
+                            { adi: "Silindir Contası", miktar: 1 },
+                            { adi: "Piston Contası", miktar: 2 },
+                            { adi: "Yağ Keçesi", miktar: 1 },
+                            { adi: "Vana Contası", miktar: 1 },
+                            { adi: "Yakıt Pompası Contası", miktar: 1 },
+                            { adi: "Hidrolik Hortum Contası", miktar: 2 },
+                            { adi: "Egzoz Manifoldu Contası", miktar: 1 },
+                            { adi: "Emme Manifoldu Contası", miktar: 1 },
+                            { adi: "Su Pompası Contası", miktar: 1 },
+                            { adi: "Radyatör Contası", miktar: 1 },
+                            { adi: "Transmisyon Contası", miktar: 1 },
+                            { adi: "Diferansiyel Contası", miktar: 1 }
+                        ]
+                    },
+                    {
+                        id: 2,
+                        adi: "Büyük Tamir Takımı",
+                        kategori: "Motor",
+                        parcalar: [
+                            { adi: "Silindir Contası", miktar: 2 },
+                            { adi: "Piston Contası", miktar: 4 },
+                            { adi: "Yağ Keçesi", miktar: 2 },
+                            { adi: "Vana Contası", miktar: 2 },
+                            { adi: "Yakıt Pompası Contası", miktar: 2 },
+                            { adi: "Hidrolik Hortum Contası", miktar: 4 },
+                            { adi: "Egzoz Manifoldu Contası", miktar: 2 },
+                            { adi: "Emme Manifoldu Contası", miktar: 2 },
+                            { adi: "Su Pompası Contası", miktar: 2 },
+                            { adi: "Radyatör Contası", miktar: 2 },
+                            { adi: "Transmisyon Contası", miktar: 2 },
+                            { adi: "Diferansiyel Contası", miktar: 2 }
+                        ]
+                    }
+                ];
+                
+                kategoriler = ["Hidrolik", "Motor", "Elektrik", "Şase", "Diğer"];
+                
+                localStorage.setItem(STORAGE_KEYS.TAKIMLAR, JSON.stringify(takimlar));
+                localStorage.setItem(STORAGE_KEYS.KATEGORILER, JSON.stringify(kategoriler));
+                
+                populateCategoryDropdowns();
+                showAllTakimlar();
+                updateStats();
+                
+                showToast('Örnek veriler başarıyla yüklendi!', 'success');
+            }
+        }
+
+        // Event listener'lar
+        let searchTimeout;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                performSearch();
+            }, 300);
+        });
+        
+        categoryFilter.addEventListener('change', performSearch);
+        
+        searchButton.addEventListener('click', performSearch);
+        
+        addTakimBtn.addEventListener('click', openAddModal);
+        
+        showAllBtn.addEventListener('click', showAllTakimlar);
+        
+        showLowStockBtn.addEventListener('click', showLowStock);
+        
+        exportBtn.addEventListener('click', exportData);
+        
+        importBtn.addEventListener('click', function() {
+            importFile.click();
+        });
+        
+        importFile.addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                importData(e.target.files[0]);
+                e.target.value = ''; // Reset file input
+            }
+        });
+        
+        resetDataBtn.addEventListener('click', resetToSampleData);
+        
+        closeButtons.forEach(button => {
+            button.addEventListener('click', closeModals);
+        });
+        
+        cancelBtn.addEventListener('click', closeModals);
+        editCancelBtn.addEventListener('click', closeModals);
+        
+        // Pencere dışına tıklayınca modal kapatma
+        window.addEventListener('click', function(event) {
+            if (event.target === addTakimModal) {
+                closeModals();
+            }
+            if (event.target === editTakimModal) {
+                closeModals();
+            }
+        });
+        
+        // Yeni parça ekleme butonları
+        addParcaBtn.addEventListener('click', function() {
+            addParcaField(parcalarContainer);
+        });
+        
+        editAddParcaBtn.addEventListener('click', function() {
+            addParcaField(editParcalarContainer);
+        });
+        
+        // Form submit işlemleri
+        takimForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const takimAdi = document.getElementById('takimAdi').value;
+            const kategori = document.getElementById('takimKategori').value;
+            const parcalar = [];
+            
+            // Parçaları topla
+            const parcaInputs = parcalarContainer.querySelectorAll('.parca-item-ekle');
+            parcaInputs.forEach(parcaDiv => {
+                const adi = parcaDiv.querySelector('.parcaAdi').value;
+                const miktar = parseInt(parcaDiv.querySelector('.parcaMiktar').value);
+                
+                if (adi.trim() !== '') {
+                    parcalar.push({ adi, miktar });
+                }
+            });
+            
+            addTakim(takimAdi, kategori, parcalar);
+        });
+        
+        editTakimForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const takimId = parseInt(document.getElementById('editTakimId').value);
+            const takimAdi = document.getElementById('editTakimAdi').value;
+            const kategori = document.getElementById('editTakimKategori').value;
+            const parcalar = [];
+            
+            // Parçaları topla
+            const parcaInputs = editParcalarContainer.querySelectorAll('.parca-item-ekle');
+            parcaInputs.forEach(parcaDiv => {
+                const adi = parcaDiv.querySelector('.parcaAdi').value;
+                const miktar = parseInt(parcaDiv.querySelector('.parcaMiktar').value);
+                
+                if (adi.trim() !== '') {
+                    parcalar.push({ adi, miktar });
+                }
+            });
+            
+            updateTakim(takimId, takimAdi, kategori, parcalar);
+        });
+    </script>
+</body>
+</html>
