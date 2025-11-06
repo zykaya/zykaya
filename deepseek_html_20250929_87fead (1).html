@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tamir Takımı Envanter Sistemi</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --accent: #4cc9f0;
+            --success: #4ade80;
+            --danger: #f43f5e;
+            --warning: #f59e0b;
+            --info: #06b6d4;
+            --light: #f8fafc;
+            --dark: #1e293b;
+            --gray: #64748b;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Giriş Ekranı Stilleri */
+        .login-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        
+        .login-logo {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+        
+        .login-title {
+            color: var(--dark);
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+        
+        .login-subtitle {
+            color: var(--gray);
+            margin-bottom: 30px;
+        }
+        
+        .login-form .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .login-form label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .login-form input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: var(--light);
+        }
+        
+        .login-form input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(76, 201, 240, 0.1);
+            background: white;
+        }
+        
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--gray);
+            cursor: pointer;
+        }
+        
+        .password-container {
+            position: relative;
+        }
+        
+        /* Ana Uygulama Stilleri */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            display: none; /* Başlangıçta gizli */
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        
+        .logout-btn {
+            position: absolute;
+            right: 0;
+            top: 0;
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .logout-btn:hover {
+            background: #e11d48;
+        }
+        
+        .header h1 {
+            color: var(--dark);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .header p {
+            color: var(--gray);
+            font-size: 1.1rem;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+        
+        .card h2 {
+            color: var(--dark);
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card h2 i {
+            color: var(--primary);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: var(--light);
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(76, 201, 240, 0.1);
+            background: white;
+        }
+        
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(67, 97, 238, 0.3);
+        }
+        
+        .btn-secondary {
+            background: var(--light);
+            color: var(--dark);
+            border: 2px solid #e2e8f0;
+        }
+        
+        .btn-secondary:hover {
+            background: #f1f5f9;
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #e11d48;
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #22c55e;
+            transform: translateY(-2px);
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background: #d97706;
+            transform: translateY(-2px);
+        }
+        
+        .btn-info {
+            background: var(--info);
+            color: white;
+        }
+        
+        .btn-info:hover {
+            background: #0891b2;
+            transform: translateY(-2px);
+        }
+        
+        .search-box {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .search-box input {
+            flex: 1;
+        }
+        
+        .backup-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .tool-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 5px solid var(--accent);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+        
+        .tool-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+        }
+        
+        .tool-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .tool-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+        
+        .tool-code {
+            background: var(--primary);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .tool-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--gray);
+        }
+        
+        .detail-item i {
+            color: var(--primary);
+            width: 16px;
+        }
+        
+        .contents {
+            background: var(--light);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border-left: 3px solid var(--accent);
+        }
+        
+        .contents pre {
+            white-space: pre-wrap;
+            font-family: inherit;
+            margin: 0;
+            line-height: 1.5;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--gray);
+        }
+        
+        .no-results i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #cbd5e1;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        .tool-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 15px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray);
+        }
+        
+        .error-message {
+            color: var(--danger);
+            font-size: 0.9rem;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .search-box {
+                flex-direction: column;
+            }
+            
+            .backup-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .tool-actions {
+                flex-direction: column;
+            }
+            
+            .logout-btn {
+                position: relative;
+                margin-bottom: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Giriş Ekranı -->
+    <div class="login-container" id="loginContainer">
+        <div class="login-logo">
+            <i class="fas fa-tools"></i>
+        </div>
+        <h1 class="login-title">Tamir Takımı Envanter Sistemi</h1>
+        <p class="login-subtitle">Lütfen giriş yapın</p>
+        
+        <form class="login-form" id="loginForm">
+            <div class="form-group">
+                <label for="username"><i class="fas fa-user"></i> Kullanıcı Adı</label>
+                <input type="text" id="username" placeholder="Kullanıcı adınızı girin" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password"><i class="fas fa-lock"></i> Şifre</label>
+                <div class="password-container">
+                    <input type="password" id="password" placeholder="Şifrenizi girin" required>
+                    <button type="button" class="password-toggle" onclick="togglePassword()">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                <div class="error-message" id="loginError">
+                    <i class="fas fa-exclamation-circle"></i> Hatalı kullanıcı adı veya şifre!
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%;">
+                <i class="fas fa-sign-in-alt"></i> Giriş Yap
+            </button>
+        </form>
+        
+        <div style="margin-top: 20px; font-size: 0.9rem; color: var(--gray);">
+            <p><strong>Varsayılan Bilgiler:</strong></p>
+            <p>Kullanıcı Adı: <strong>admin</strong></p>
+            <p>Şifre: <strong>1234</strong></p>
+        </div>
+    </div>
+
+    <!-- Ana Uygulama -->
+    <div class="container" id="appContainer">
+        <div class="header">
+            <button class="logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Çıkış
+            </button>
+            <h1><i class="fas fa-tools"></i> TAMİR TAKIMI ENVANTER SİSTEMİ</h1>
+            <p>Takımlarınızı kolayca yönetin ve takip edin</p>
+        </div>
+        
+        <!-- İstatistikler -->
+        <div class="stats" id="statsContainer">
+            <!-- İstatistikler buraya eklenecek -->
+        </div>
+        
+        <!-- Kayıt Formu -->
+        <div class="card">
+            <h2><i class="fas fa-plus-circle"></i> Yeni Takım Ekle</h2>
+            <form id="toolForm">
+                <input type="hidden" id="editId">
+                <div class="form-group">
+                    <label for="toolName"><i class="fas fa-toolbox"></i> Takım Adı *</label>
+                    <input type="text" id="toolName" required placeholder="Örnek: 1 No'lu Tamir Takımı">
+                </div>
+                
+                <div class="form-group">
+                    <label for="toolCode"><i class="fas fa-barcode"></i> Takım Kodu *</label>
+                    <input type="text" id="toolCode" required placeholder="Örnek: TK-001">
+                </div>
+                
+                <div class="form-group">
+                    <label for="location"><i class="fas fa-map-marker-alt"></i> Bulunduğu Yer *</label>
+                    <input type="text" id="location" required placeholder="Örnek: Dolap A, Raf 2">
+                </div>
+                
+                <div class="form-group">
+                    <label for="contents"><i class="fas fa-list"></i> İçindeki Parçalar *</label>
+                    <textarea id="contents" required placeholder="Her parçayı yeni satıra yazın&#10;Örnek:&#10;- 17'lik lokma&#10;- 13'lük lokma&#10;- Tornavida seti&#10;- Penseler"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="notes"><i class="fas fa-sticky-note"></i> Notlar</label>
+                    <textarea id="notes" placeholder="Ek bilgiler..."></textarea>
+                </div>
+                
+                <div>
+                    <button type="submit" class="btn btn-primary" id="submitButton">
+                        <i class="fas fa-save"></i> Takımı Kaydet
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="clearForm()">
+                        <i class="fas fa-broom"></i> Formu Temizle
+                    </button>
+                    <button type="button" class="btn btn-warning" id="cancelEditButton" style="display: none;" onclick="cancelEdit()">
+                        <i class="fas fa-times"></i> Düzenlemeyi İptal Et
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Yedekleme Bölümü -->
+        <div class="card">
+            <h2><i class="fas fa-database"></i> Yedekleme ve Geri Yükleme</h2>
+            <div class="backup-section">
+                <button class="btn btn-success" onclick="exportData()">
+                    <i class="fas fa-download"></i> Verileri Yedekle
+                </button>
+                <button class="btn btn-primary" onclick="importData()">
+                    <i class="fas fa-upload"></i> Yedeği Geri Yükle
+                </button>
+            </div>
+            <input type="file" id="importFile" accept=".json" style="display: none;">
+        </div>
+        
+        <!-- Arama Bölümü -->
+        <div class="card">
+            <h2><i class="fas fa-search"></i> Takım Arama</h2>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Takım adı, kodu, yer veya içerikte ara..." onkeypress="handleKeyPress(event)">
+                <button class="btn btn-primary" onclick="searchTools()">
+                    <i class="fas fa-search"></i> Ara
+                </button>
+                <button class="btn btn-secondary" onclick="clearSearch()">
+                    <i class="fas fa-times"></i> Temizle
+                </button>
+            </div>
+        </div>
+        
+        <!-- Sonuçlar -->
+        <div class="card">
+            <h2><i class="fas fa-clipboard-list"></i> Kayıtlı Takımlar</h2>
+            <div id="resultsContainer">
+                <!-- Sonuçlar buraya eklenecek -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Düzenleme Modal -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fas fa-edit"></i> Takımı Düzenle</h3>
+                <button class="close-modal" onclick="closeEditModal()">&times;</button>
+            </div>
+            <form id="editForm">
+                <input type="hidden" id="modalEditId">
+                <div class="form-group">
+                    <label for="modalToolName">Takım Adı *</label>
+                    <input type="text" id="modalToolName" required>
+                </div>
+                <div class="form-group">
+                    <label for="modalToolCode">Takım Kodu *</label>
+                    <input type="text" id="modalToolCode" required>
+                </div>
+                <div class="form-group">
+                    <label for="modalLocation">Bulunduğu Yer *</label>
+                    <input type="text" id="modalLocation" required>
+                </div>
+                <div class="form-group">
+                    <label for="modalContents">İçindeki Parçalar *</label>
+                    <textarea id="modalContents" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="modalNotes">Notlar</label>
+                    <textarea id="modalNotes"></textarea>
+                </div>
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">
+                        <i class="fas fa-times"></i> İptal
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Değişiklikleri Kaydet
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Şifre kontrolü
+        const VALID_USERNAME = "admin";
+        const VALID_PASSWORD = "1234";
+        
+        // Oturum kontrolü
+        function checkAuth() {
+            return localStorage.getItem('authenticated') === 'true';
+        }
+        
+        // Giriş yap
+        function login(username, password) {
+            if (username === VALID_USERNAME && password === VALID_PASSWORD) {
+                localStorage.setItem('authenticated', 'true');
+                showApp();
+                return true;
+            }
+            return false;
+        }
+        
+        // Çıkış yap
+        function logout() {
+            localStorage.removeItem('authenticated');
+            showLogin();
+        }
+        
+        // Uygulamayı göster
+        function showApp() {
+            document.getElementById('loginContainer').style.display = 'none';
+            document.getElementById('appContainer').style.display = 'block';
+            displayTools(tools);
+            updateStats();
+        }
+        
+        // Giriş ekranını göster
+        function showLogin() {
+            document.getElementById('loginContainer').style.display = 'block';
+            document.getElementById('appContainer').style.display = 'none';
+            document.getElementById('loginForm').reset();
+            document.getElementById('loginError').style.display = 'none';
+        }
+        
+        // Şifre göster/gizle
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.querySelector('.password-toggle i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.className = 'fas fa-eye-slash';
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.className = 'fas fa-eye';
+            }
+        }
+        
+        // Giriş formu
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorElement = document.getElementById('loginError');
+            
+            if (login(username, password)) {
+                errorElement.style.display = 'none';
+            } else {
+                errorElement.style.display = 'block';
+            }
+        });
+        
+        // Sayfa yüklendiğinde oturum kontrolü
+        document.addEventListener('DOMContentLoaded', function() {
+            if (checkAuth()) {
+                showApp();
+            } else {
+                showLogin();
+            }
+            
+            // Modal dışına tıklayınca kapat
+            document.getElementById('editModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeEditModal();
+                }
+            });
+        });
+
+        // Takımları localStorage'da sakla
+        let tools = JSON.parse(localStorage.getItem('tools')) || [];
+        let isEditing = false;
+        
+        // İstatistikleri güncelle
+        function updateStats() {
+            const statsContainer = document.getElementById('statsContainer');
+            statsContainer.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-number">${tools.length}</div>
+                    <div class="stat-label">Toplam Takım</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${new Set(tools.map(t => t.location)).size}</div>
+                    <div class="stat-label">Farklı Konum</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${tools.reduce((acc, tool) => acc + tool.contents.split('\n').length, 0)}</div>
+                    <div class="stat-label">Toplam Parça</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${new Date().toLocaleDateString('tr-TR')}</div>
+                    <div class="stat-label">Son Güncelleme</div>
+                </div>
+            `;
+        }
+        
+        // Enter tuşu ile arama
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                searchTools();
+            }
+        }
+        
+        // Form gönderimi
+        document.getElementById('toolForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const toolData = {
+                name: document.getElementById('toolName').value,
+                code: document.getElementById('toolCode').value,
+                location: document.getElementById('location').value,
+                contents: document.getElementById('contents').value,
+                notes: document.getElementById('notes').value
+            };
+            
+            if (isEditing) {
+                // Düzenleme modunda
+                const editId = document.getElementById('editId').value;
+                const toolIndex = tools.findIndex(tool => tool.id === editId);
+                
+                if (toolIndex !== -1) {
+                    tools[toolIndex] = {
+                        ...tools[toolIndex],
+                        ...toolData,
+                        date: new Date().toLocaleDateString('tr-TR'),
+                        timestamp: new Date().toISOString()
+                    };
+                    
+                    localStorage.setItem('tools', JSON.stringify(tools));
+                    showNotification('Takım başarıyla güncellendi!', 'success');
+                    cancelEdit();
+                }
+            } else {
+                // Yeni kayıt modunda
+                const tool = {
+                    id: Date.now().toString(),
+                    ...toolData,
+                    date: new Date().toLocaleDateString('tr-TR'),
+                    timestamp: new Date().toISOString()
+                };
+                
+                tools.push(tool);
+                localStorage.setItem('tools', JSON.stringify(tools));
+                showNotification('Takım başarıyla kaydedildi!', 'success');
+                clearForm();
+            }
+            
+            displayTools(tools);
+            updateStats();
+        });
+        
+        // Takım düzenle
+        function editTool(id) {
+            const tool = tools.find(t => t.id === id);
+            if (tool) {
+                document.getElementById('editId').value = tool.id;
+                document.getElementById('toolName').value = tool.name;
+                document.getElementById('toolCode').value = tool.code;
+                document.getElementById('location').value = tool.location;
+                document.getElementById('contents').value = tool.contents;
+                document.getElementById('notes').value = tool.notes || '';
+                
+                isEditing = true;
+                document.getElementById('submitButton').innerHTML = '<i class="fas fa-sync-alt"></i> Takımı Güncelle';
+                document.getElementById('cancelEditButton').style.display = 'inline-flex';
+                
+                showNotification('Düzenleme moduna geçildi. Değişiklikleri kaydedin veya iptal edin.', 'info');
+            }
+        }
+        
+        // Modal ile düzenle
+        function editToolModal(id) {
+            const tool = tools.find(t => t.id === id);
+            if (tool) {
+                document.getElementById('modalEditId').value = tool.id;
+                document.getElementById('modalToolName').value = tool.name;
+                document.getElementById('modalToolCode').value = tool.code;
+                document.getElementById('modalLocation').value = tool.location;
+                document.getElementById('modalContents').value = tool.contents;
+                document.getElementById('modalNotes').value = tool.notes || '';
+                
+                document.getElementById('editModal').style.display = 'flex';
+            }
+        }
+        
+        // Düzenlemeyi iptal et
+        function cancelEdit() {
+            isEditing = false;
+            document.getElementById('submitButton').innerHTML = '<i class="fas fa-save"></i> Takımı Kaydet';
+            document.getElementById('cancelEditButton').style.display = 'none';
+            clearForm();
+            showNotification('Düzenleme iptal edildi.', 'info');
+        }
+        
+        // Modal'ı kapat
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+        
+        // Modal form gönderimi
+        document.getElementById('editForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const editId = document.getElementById('modalEditId').value;
+            const toolIndex = tools.findIndex(tool => tool.id === editId);
+            
+            if (toolIndex !== -1) {
+                tools[toolIndex] = {
+                    ...tools[toolIndex],
+                    name: document.getElementById('modalToolName').value,
+                    code: document.getElementById('modalToolCode').value,
+                    location: document.getElementById('modalLocation').value,
+                    contents: document.getElementById('modalContents').value,
+                    notes: document.getElementById('modalNotes').value,
+                    date: new Date().toLocaleDateString('tr-TR'),
+                    timestamp: new Date().toISOString()
+                };
+                
+                localStorage.setItem('tools', JSON.stringify(tools));
+                displayTools(tools);
+                updateStats();
+                closeEditModal();
+                showNotification('Takım başarıyla güncellendi!', 'success');
+            }
+        });
+        
+        // Takım arama
+        function searchTools() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            if (!searchTerm) {
+                displayTools(tools);
+                return;
+            }
+            
+            const filteredTools = tools.filter(tool => 
+                tool.name.toLowerCase().includes(searchTerm) ||
+                tool.code.toLowerCase().includes(searchTerm) ||
+                tool.location.toLowerCase().includes(searchTerm) ||
+                tool.contents.toLowerCase().includes(searchTerm) ||
+                (tool.notes && tool.notes.toLowerCase().includes(searchTerm))
+            );
+            
+            displayTools(filteredTools);
+        }
+        
+        // Takımları göster
+        function displayTools(toolsToDisplay) {
+            const container = document.getElementById('resultsContainer');
+            
+            if (toolsToDisplay.length === 0) {
+                container.innerHTML = `
+                    <div class="no-results">
+                        <i class="fas fa-search"></i>
+                        <h3>Kayıtlı takım bulunamadı</h3>
+                        <p>Arama kriterlerinize uygun takım bulunmuyor</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = toolsToDisplay.map(tool => `
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <div class="tool-name">${tool.name}</div>
+                        <div class="tool-code">${tool.code}</div>
+                    </div>
+                    <div class="tool-details">
+                        <div class="detail-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>${tool.location}</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-calendar"></i>
+                            <span>${tool.date}</span>
+                        </div>
+                    </div>
+                    <div class="contents">
+                        <label><i class="fas fa-list"></i> İçindekiler:</label>
+                        <pre>${tool.contents}</pre>
+                    </div>
+                    ${tool.notes ? `
+                    <div class="detail-item">
+                        <i class="fas fa-sticky-note"></i>
+                        <span><strong>Notlar:</strong> ${tool.notes}</span>
+                    </div>
+                    ` : ''}
+                    <div class="tool-actions">
+                        <button class="btn btn-info" onclick="editToolModal('${tool.id}')">
+                            <i class="fas fa-edit"></i> Düzenle
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteTool('${tool.id}')">
+                            <i class="fas fa-trash"></i> Sil
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Takım silme
+        function deleteTool(id) {
+            if (confirm('Bu takımı silmek istediğinizden emin misiniz?')) {
+                tools = tools.filter(tool => tool.id !== id);
+                localStorage.setItem('tools', JSON.stringify(tools));
+                displayTools(tools);
+                updateStats();
+                showNotification('Takım başarıyla silindi!', 'success');
+            }
+        }
+        
+        // Form temizleme
+        function clearForm() {
+            document.getElementById('toolForm').reset();
+            document.getElementById('editId').value = '';
+        }
+        
+        // Arama temizleme
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            displayTools(tools);
+        }
+        
+        // Bildirim göster
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                background: ${type === 'success' ? '#4ade80' : type === 'warning' ? '#f59e0b' : '#3b82f6'};
+                color: white;
+                border-radius: 10px;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+                z-index: 1000;
+                animation: slideIn 0.3s ease;
+            `;
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-${type === 'success' ? 'check' : type === 'warning' ? 'exclamation-triangle' : 'info'}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+        
+        // Verileri dışa aktar (yedekle)
+        function exportData() {
+            const dataStr = JSON.stringify(tools, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `takim-envanter-yedek-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            showNotification('Veriler başarıyla yedeklendi!', 'success');
+        }
+        
+        // Verileri içe aktar (geri yükle)
+        function importData() {
+            document.getElementById('importFile').click();
+        }
+        
+        // Dosya seçildiğinde
+        document.getElementById('importFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    
+                    if (Array.isArray(importedData)) {
+                        if (confirm(`Yedekten ${importedData.length} takım bulundu. Mevcut verilerin üzerine yazılsın mı?`)) {
+                            tools = importedData;
+                            localStorage.setItem('tools', JSON.stringify(tools));
+                            displayTools(tools);
+                            updateStats();
+                            showNotification('Veriler başarıyla geri yüklendi!', 'success');
+                        }
+                    } else {
+                        alert('Geçersiz yedek dosyası!');
+                    }
+                } catch (error) {
+                    alert('Dosya okunurken hata oluştu!');
+                }
+            };
+            reader.readAsText(file);
+            e.target.value = '';
+        });
+    </script>
+</body>
+</html>
